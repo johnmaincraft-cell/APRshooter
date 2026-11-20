@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Шутер Аккаунты</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+    body { background: #12121f; color: #fff; font-family: sans-serif; overflow: hidden; }
+    .scr { position: fixed; inset: 0; background: #12121f; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; z-index: 10; padding: 15px; }
+    .hide { display: none !important; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; }
+    input { padding: 10px; border-radius: 8px; border: 2px solid #303a52; background: #1e2749; color: #fff; font-size: 16px; width: 220px; user-select: text; }
+    button { border: none; border-radius: 8px; font-weight: bold; padding: 8px 14px; color: #fff; background: #1e2749; }
+    .play { background: #2ecc71; font-size: 17px; padding: 10px 22px; }
+    .act { outline: 2px solid #00d2ff; background: #0f3460; }
+    .eq { outline: 2px solid #2ecc71; background: #1b3329; }
+    #hud, #ctrl { position: fixed; left: 15px; right: 15px; display: flex; justify-content: space-between; z-index: 5; }
+    #hud { top: 10px; } #ctrl { bottom: 15px; }
+    .gb { width: 58px; height: 58px; border-radius: 50%; background: rgba(255,255,255,0.25); border: 2px solid #fff; font-size: 20px; }
+  </style>
+</head>
+<body>
+<div id="auth" class="scr">
+  <h2 style="color:#f1c40f">ВХОД В ИГРУ</h2>
+  <input id="nick" placeholder="Введите ник">
+  <input id="pass" type="password" placeholder="Введите пароль">
+  <div id="err" style="color:#e74c3c;font-size:14px;min-height:18px"></div>
+  <button class="play" onclick="login()">Войти / Создать аккаунт</button>
+</div>
+<div id="menu" class="scr hide">
+  <div class="row"><b style="color:#00d2ff">👤 <span id="un"></span></b><span style="padding:4px 10px;border:1px solid #f1c40f;border-radius:10px">🪙 <b id="mc">0</b></span><button class="play" onclick="go()">▶ ИГРАТЬ</button><button style="background:#e74c3c" onclick="logout()">Выйти</button></div>
+  <div class="row"><button class="act" id="l0" onclick="sl(0)">🌃 Город</button><button id="l1" onclick="sl(1)">🏜️ Пустыня</button><button id="l2" onclick="sl(2)">🌋 Вулкан</button></div>
+  <div class="row"><button class="eq" id="w0" onclick="bw(0)">Пистолет (Выбр)</button><button id="w1" onclick="bw(1)">Автомат 40🪙</button><button id="w2" onclick="bw(2)">Дробовик 100🪙</button><button id="w3" onclick="bw(3)">Лазер 200🪙</button></div>
+</div>
+<div id="over" class="scr hide"><h2 style="color:#e74c3c">ВЫ ПОГИБЛИ</h2><p>Прогресс сохранён!</p><button class="play" onclick="tm()">В меню</button></div>
+<div id="hud" class="hide"><div style="background:#0008;padding:6px 12px;border-radius:8px">❤️ <b id="hp">100</b> | 🪙 <b id="gc">0</b></div><button style="background:#e74c3c" onclick="tm()">Меню</button></div>
+<div id="ctrl" class="hide"><div><button class="gb" id="bl">◀</button><button class="gb" id="br">▶</button></div><div><button class="gb" id="bj">▲</button><button class="gb" id="bf" style="background:#e74c3c88">🔥</button></div></div>
+<canvas id="c"></canvas>
+<script>
+var c=document.getElementById('c'),x=c.getContext('2d'),W=640,H=360,gy=280;
+function rz(){W=c.width=innerWidth;H=c.height=innerHeight;gy=H-80}onresize=rz;rz();
+var curUser='',coins=0,eq=0,loc=0,o1=0,o2=0,o3=0,run=0,p,bul,ens,drp,tk=0,lf=0,inp={l:0,r:0,j:0,f:0};
+function getDB(){try{return JSON.parse(localStorage.getItem('sh_accs'))||{}}catch(e){return{}}}
+function saveProg(){if(!curUser)return;var db=getDB();if(db[curUser]){db[curUser].c=coins;db[curUser].e=eq;db[curUser].o1=o1;db[curUser].o2=o2;db[curUser].o3=o3;try{localStorage.setItem('sh_accs',JSON.stringify(db))}catch(e){}}}
+function login(){var n=nick.value.trim(),pw=pass.value.trim();if(!n||!pw){err.innerText='Введите ник и пароль!';return}var db=getDB();if(db[n]){if(db[n].p!==pw){err.innerText='Неверный пароль!';return}}else{db[n]={p:pw,c:0,e:0,o1:0,o2:0,o3:0};try{localStorage.setItem('sh_accs',JSON.stringify(db))}catch(e){}}curUser=n;var u=db[n];coins=u.c||0;eq=u.e||0;o1=u.o1||0;o2=u.o2||0;o3=u.o3||0;un.innerText=curUser;err.innerText='';auth.className='scr hide';menu.className='scr';up()}
+function logout(){saveProg();curUser='';nick.value=pass.value='';menu.className='scr hide';auth.className='scr'}
+function sl(i){loc=i;l0.className=i==0?'act':'';l1.className=i==1?'act':'';l2.className=i==2?'act':''}
+function up(){mc.innerText=gc.innerText=coins;w0.className=eq==0?'eq':'';w1.className=eq==1?'eq':'';w2.className=eq==2?'eq':'';w3.className=eq==3?'eq':'';w0.innerText=eq==0?'Пистолет (Выбр)':'Пистолет';w1.innerText=eq==1?'Автомат (Выбр)':(o1?'Автомат':'Автомат 40🪙');w2.innerText=eq==2?'Дробовик (Выбр)':(o2?'Дробовик':'Дробовик 100🪙');w3.innerText=eq==3?'Лазер (Выбр)':(o3?'Лазер':'Лазер 200🪙')}
+function bw(i){if(i==0)eq=0;if(i==1){if(o1)eq=1;else if(coins>=40){coins-=40;o1=1;eq=1}}if(i==2){if(o2)eq=2;else if(coins>=100){coins-=100;o2=1;eq=2}}if(i==3){if(o3)eq=3;else if(coins>=200){coins-=200;o3=1;eq=3}}saveProg();up()}
+function bn(id,k){var e=document.getElementById(id);e.ontouchstart=function(v){v.preventDefault();inp[k]=1};e.ontouchend=function(v){v.preventDefault();inp[k]=0};e.onmousedown=function(){inp[k]=1};e.onmouseup=function(){inp[k]=0}}
+bn('bl','l');bn('br','r');bn('bj','j');bn('bf','f');
+function go(){rz();menu.className='scr hide';over.className='scr hide';hud.className=ctrl.className='';p={x:W/2,y:gy-48,w:24,h:48,vy:0,d:1,hp:100,g:0,wk:0};bul=[];ens=[];drp=[];tk=0;hp.innerText=100;run=1;lp()}
+function tm(){run=0;saveProg();hud.className=ctrl.className='hide';over.className='scr hide';menu.className='scr';up()}
+function man(px,py,d,wk,en,bg){var s=bg?1.3:1,st=Math.sin(wk)*5;x.strokeStyle=en?'#1e8449':'#34495e';x.lineWidth=4*s;x.beginPath();x.moveTo(px+8*s,py+30*s);x.lineTo(px+8*s-st,py+46*s);x.moveTo(px+16*s,py+30*s);x.lineTo(px+16*s+st,py+46*s);x.stroke();x.fillStyle=en?(bg?'#8e44ad':'#27ae60'):'#2980b9';x.fillRect(px+4*s,py+14*s,16*s,18*s);x.fillStyle=en?'#58d68d':'#f5cba7';x.beginPath();x.arc(px+12*s,py+7*s,7*s,0,7);x.fill();x.fillStyle=en?'#f00':'#0df';x.fillRect(d==1?px+13*s:px+5*s,py+5*s,5*s,3*s);if(!en){x.fillStyle=eq==1?'#0df':(eq==2?'#f94':(eq==3?'#f45':'#fc0'));x.fillRect(d==1?px+12:px-10,py+19,22,5)}}
+function lp(){if(!run)return;if(inp.l){p.x-=5;p.d=-1;p.wk+=.3}else if(inp.r){p.x+=5;p.d=1;p.wk+=.3}else p.wk=0;if(inp.j&&p.g){p.vy=-12;p.g=0}p.vy+=.6;p.y+=p.vy;if(p.x<0)p.x=0;if(p.x+p.w>W)p.x=W-p.w;if(p.y+p.h>=gy){p.y=gy-p.h;p.vy=0;p.g=1}
+var rt=eq==1?120:(eq==2?600:(eq==3?220:350));if(inp.f&&Date.now()-lf>rt){lf=Date.now();var cn=eq==2?5:1;for(var i=0;i<cn;i++){var a=eq==2?(Math.random()-.5)*.35:0;bul.push({x:p.d==1?p.x+28:p.x-8,y:p.y+21,vx:Math.cos(a)*14*p.d,vy:Math.sin(a)*14,dm:eq==1?18:(eq==2?20:(eq==3?70:25)),pr:eq==3})}}
+for(var i=bul.length-1;i>=0;i--){bul[i].x+=bul[i].vx;bul[i].y+=bul[i].vy;if(bul[i].x<-20||bul[i].x>W+20)bul.splice(i,1)}
+if(++tk==20||tk%80==0){var bg=Math.random()<.25;ens.push({x:Math.random()<.5?-30:W+30,y:gy-(bg?60:46),w:bg?32:24,h:bg?60:46,sp:bg?1.5:2.5,hp:bg?100:40,bg:bg,wk:0,v:bg?25:10})}
+for(var i=ens.length-1;i>=0;i--){var e=ens[i];e.x+=(e.x<p.x?1:-1)*e.sp;e.wk+=.25;if(p.x<e.x+e.w&&p.x+p.w>e.x&&p.y<e.y+e.h&&p.y+p.h>e.y){p.hp-=20;hp.innerText=Math.max(0,p.hp);ens.splice(i,1);if(p.hp<=0){run=0;saveProg();hud.className=ctrl.className='hide';over.className='scr';return}continue}for(var j=bul.length-1;j>=0;j--){var b=bul[j];if(b.x>e.x&&b.x<e.x+e.w&&b.y>e.y&&b.y<e.y+e.h){e.hp-=b.dm;if(!b.pr)bul.splice(j,1);if(e.hp<=0){drp.push({x:e.x+10,y:gy-10,v:e.v});ens.splice(i,1);break}}}}
+for(var i=drp.length-1;i>=0;i--)if(Math.abs(p.x+12-drp[i].x)<35&&Math.abs(p.y+24-drp[i].y)<40){coins+=drp[i].v;gc.innerText=coins;saveProg();drp.splice(i,1)}
+x.fillStyle=loc==0?'#0f172a':(loc==1?'#f97316':'#450a0a');x.fillRect(0,0,W,gy);
+if(loc==0){x.fillStyle='#fef08a';x.beginPath();x.arc(W-70,50,20,0,7);x.fill();for(var bx=20;bx<W;bx+=90){x.fillStyle='#1e293b';x.fillRect(bx,gy-100,60,100);x.fillStyle='#facc15';x.fillRect(bx+12,gy-80,8,10)}}
+if(loc==1){x.fillStyle='#fde047';x.beginPath();x.arc(80,60,28,0,7);x.fill();x.fillStyle='#d97706';x.beginPath();x.moveTo(140,gy);x.lineTo(230,gy-100);x.lineTo(320,gy);x.fill()}
+if(loc==2){x.fillStyle='#1c1917';x.beginPath();x.moveTo(120,gy);x.lineTo(230,gy-120);x.lineTo(270,gy-120);x.lineTo(380,gy);x.fill();x.fillStyle='#ef4444';x.fillRect(232,gy-120,36,8)}
+x.fillStyle=loc==0?'#334155':(loc==1?'#eab308':'#1c1917');x.fillRect(0,gy,W,H-gy);
+for(var i=0;i<drp.length;i++){x.beginPath();x.arc(drp[i].x,drp[i].y,8,0,7);x.fillStyle='#f1c40f';x.fill()}
+man(p.x,p.y,p.d,p.wk,0,0);for(var i=0;i<ens.length;i++)man(ens[i].x,ens[i].y,ens[i].x<p.x?1:-1,ens[i].wk,1,ens[i].bg);
+x.fillStyle='#fff';for(var i=0;i<bul.length;i++)x.fillRect(bul[i].x-5,bul[i].y-2,10,4);
+requestAnimationFrame(lp)}
+</script>
+</body>
+                                                                                                                                                                                                                         </html>
+                                                                                                                                                                                                                         
