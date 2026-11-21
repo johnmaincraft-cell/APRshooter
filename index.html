@@ -1,74 +1,878 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Шутер Аккаунты</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-    body { background: #12121f; color: #fff; font-family: sans-serif; overflow: hidden; }
-    .scr { position: fixed; inset: 0; background: #12121f; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; z-index: 10; padding: 15px; }
-    .hide { display: none !important; }
-    .row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; }
-    input { padding: 10px; border-radius: 8px; border: 2px solid #303a52; background: #1e2749; color: #fff; font-size: 16px; width: 220px; user-select: text; }
-    button { border: none; border-radius: 8px; font-weight: bold; padding: 8px 14px; color: #fff; background: #1e2749; }
-    .play { background: #2ecc71; font-size: 17px; padding: 10px 22px; }
-    .act { outline: 2px solid #00d2ff; background: #0f3460; }
-    .eq { outline: 2px solid #2ecc71; background: #1b3329; }
-    #hud, #ctrl { position: fixed; left: 15px; right: 15px; display: flex; justify-content: space-between; z-index: 5; }
-    #hud { top: 10px; } #ctrl { bottom: 15px; }
-    .gb { width: 58px; height: 58px; border-radius: 50%; background: rgba(255,255,255,0.25); border: 2px solid #fff; font-size: 20px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>APRshooter 2.0 Pro</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0c14;color:#fff;font-family:sans-serif;overflow:hidden;user-select:none}
+.s{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(11,12,20,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:10;padding:14px}
+.h{display:none!important}
+.r{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+input{padding:10px 14px;border-radius:8px;border:2px solid #2b3556;background:#161d36;color:#fff;font-size:15px;width:220px;outline:none}
+button{border:0;border-radius:8px;font-weight:bold;padding:10px 14px;color:#fff;background:#1e2749;font-size:13px;cursor:pointer}
+button:active{transform:scale(0.95)}
+.g{background:#2ecc71;font-size:15px;padding:12px 22px}
+.o{background:#e67e22;font-size:15px;padding:12px 22px}
+.b{background:#3498db;font-size:15px;padding:12px 22px}
+.red{background:#e74c3c}
+.al{outline:2px solid #00d2ff;background:#0f3460}
+.aw{outline:2px solid #2ecc71;background:#163828}
+#hud{position:fixed;top:10px;left:15px;right:15px;display:flex;justify-content:space-between;align-items:center;z-index:5}
+.hb{background:rgba(0,0,0,0.65);padding:6px 12px;border-radius:8px;font-size:13px;border:1px solid rgba(255,255,255,0.12)}
+#ctrl{position:fixed;bottom:16px;left:16px;right:16px;display:flex;justify-content:space-between;z-index:5}
+.pg{display:flex;gap:12px}
+.pb{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.8);font-size:20px;display:flex;align-items:center;justify-content:center}
+.pf{background:rgba(231,76,60,0.45);border-color:#ff6b6b;font-size:14px}
+.bx{background:#161b33;padding:18px;border-radius:14px;border:1px solid #303a52;text-align:center;max-width:340px;width:100%}
+#st{position:fixed;top:2px;left:4px;font-size:10px;color:#2ecc71;z-index:99}
+</style>
 </head>
 <body>
-<div id="auth" class="scr">
-  <h2 style="color:#f1c40f">ВХОД В ИГРУ</h2>
-  <input id="nick" placeholder="Введите ник">
-  <input id="pass" type="password" placeholder="Введите пароль">
-  <div id="err" style="color:#e74c3c;font-size:14px;min-height:18px"></div>
-  <button class="play" onclick="login()">Войти / Создать аккаунт</button>
+
+<div id="st">WAIT</div>
+
+<div id="auth" class="s">
+  <h1 style="color:#ffcc00">APRshooter 2.0</h1>
+  <input id="nk" placeholder="Ник">
+  <input id="pw" type="password" placeholder="Пароль">
+  <div id="er" style="color:#ff5555;font-size:13px;min-height:16px"></div>
+  <button type="button" id="bLgn" class="g">Войти / Создать</button>
 </div>
-<div id="menu" class="scr hide">
-  <div class="row"><b style="color:#00d2ff">👤 <span id="un"></span></b><span style="padding:4px 10px;border:1px solid #f1c40f;border-radius:10px">🪙 <b id="mc">0</b></span><button class="play" onclick="go()">▶ ИГРАТЬ</button><button style="background:#e74c3c" onclick="logout()">Выйти</button></div>
-  <div class="row"><button class="act" id="l0" onclick="sl(0)">🌃 Город</button><button id="l1" onclick="sl(1)">🏜️ Пустыня</button><button id="l2" onclick="sl(2)">🌋 Вулкан</button></div>
-  <div class="row"><button class="eq" id="w0" onclick="bw(0)">Пистолет (Выбр)</button><button id="w1" onclick="bw(1)">Автомат 40🪙</button><button id="w2" onclick="bw(2)">Дробовик 100🪙</button><button id="w3" onclick="bw(3)">Лазер 200🪙</button></div>
+
+<div id="menu" class="s h">
+  <div class="r">
+    <span class="hb" style="color:#00d2ff">Игрок: <b id="un">---</b></span>
+    <span class="hb" style="color:#ffcc00">Монеты: <b id="mc">0</b></span>
+    <button type="button" id="bSnd">Звук: ВКЛ</button>
+    <button type="button" id="bOut" class="red">Выйти</button>
+  </div>
+  <div class="r" style="margin:6px 0">
+    <button type="button" id="bSolo" class="g">ОДИНОЧНАЯ</button>
+    <button type="button" id="bPvpOpen" class="o">МУЛЬТИПЛЕЕР</button>
+    <button type="button" id="bShopOpen" class="b">МАГАЗИН</button>
+  </div>
+  <div style="color:#8892b0;font-size:12px">Выбор арены:</div>
+  <div class="r">
+    <button type="button" id="l0" class="al">Город</button>
+    <button type="button" id="l1">Пустыня</button>
+    <button type="button" id="l2">Вулкан</button>
+  </div>
 </div>
-<div id="over" class="scr hide"><h2 style="color:#e74c3c">ВЫ ПОГИБЛИ</h2><p>Прогресс сохранён!</p><button class="play" onclick="tm()">В меню</button></div>
-<div id="hud" class="hide"><div style="background:#0008;padding:6px 12px;border-radius:8px">❤️ <b id="hp">100</b> | 🪙 <b id="gc">0</b></div><button style="background:#e74c3c" onclick="tm()">Меню</button></div>
-<div id="ctrl" class="hide"><div><button class="gb" id="bl">◀</button><button class="gb" id="br">▶</button></div><div><button class="gb" id="bj">▲</button><button class="gb" id="bf" style="background:#e74c3c88">🔥</button></div></div>
+
+<div id="shopM" class="s h">
+  <div class="bx">
+    <h3 style="color:#3498db;margin-bottom:6px">Арсенал и магазин</h3>
+    <div style="color:#ffcc00;font-size:14px;margin-bottom:12px">Баланс: <b id="sc">0</b> монет</div>
+    <div class="r" style="margin-bottom:14px">
+      <button type="button" id="w0" data-n="Пистолет" class="aw">Пистолет</button>
+      <button type="button" id="w1" data-n="Автомат">Автомат (40)</button>
+      <button type="button" id="w2" data-n="Дробовик">Дробовик (100)</button>
+      <button type="button" id="w3" data-n="Лазер">Лазер (200)</button>
+      <button type="button" id="w4" data-n="Ракета">Ракета (350)</button>
+      <button type="button" id="w5" data-n="Плазма">Плазма (500)</button>
+    </div>
+    <button type="button" id="bShopClose" class="red" style="width:100%">Закрыть магазин</button>
+  </div>
+</div>
+
+<div id="pvpM" class="s h">
+  <div class="bx">
+    <h3 style="color:#e67e22;margin-bottom:10px">Вход 2-го игрока</h3>
+    <input id="nk2" placeholder="Ник Игрока 2" style="margin-bottom:8px;width:100%">
+    <input id="pw2" type="password" placeholder="Пароль Игрока 2" style="margin-bottom:8px;width:100%">
+    <div id="er2" style="color:#ff5555;font-size:12px;min-height:14px;margin-bottom:8px"></div>
+    <div class="r">
+      <button type="button" id="bPvpGo" class="o">Начать бой!</button>
+      <button type="button" id="bPvpNo" style="background:#555">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div id="over" class="s h">
+  <h2 id="oTit" style="color:#e74c3c;font-size:26px">ВЫ ПОГИБЛИ</h2>
+  <p id="oSub" style="color:#ffcc00;font-size:15px"></p>
+  <button type="button" id="bTm1" class="g">В меню</button>
+</div>
+
+<div id="hud" class="h">
+  <div class="hb" id="hL">HP: 100 | Монеты: 0</div>
+  <div class="hb" id="hM">Волна: 1</div>
+  <div class="r">
+    <button type="button" id="bSnd2">Звук</button>
+    <button type="button" id="bTm2" class="red">Меню</button>
+  </div>
+</div>
+
+<div id="ctrl" class="h">
+  <div class="pg">
+    <button type="button" class="pb" id="pL">&lt;</button>
+    <button type="button" class="pb" id="pR">&gt;</button>
+  </div>
+  <div class="pg">
+    <button type="button" class="pb" id="pJ">^</button>
+    <button type="button" class="pb pf" id="pF">ОГОНЬ</button>
+  </div>
+</div>
+
 <canvas id="c"></canvas>
 <script>
-var c=document.getElementById('c'),x=c.getContext('2d'),W=640,H=360,gy=280;
-function rz(){W=c.width=innerWidth;H=c.height=innerHeight;gy=H-80}onresize=rz;rz();
-var curUser='',coins=0,eq=0,loc=0,o1=0,o2=0,o3=0,run=0,p,bul,ens,drp,tk=0,lf=0,inp={l:0,r:0,j:0,f:0};
-function getDB(){try{return JSON.parse(localStorage.getItem('sh_accs'))||{}}catch(e){return{}}}
-function saveProg(){if(!curUser)return;var db=getDB();if(db[curUser]){db[curUser].c=coins;db[curUser].e=eq;db[curUser].o1=o1;db[curUser].o2=o2;db[curUser].o3=o3;try{localStorage.setItem('sh_accs',JSON.stringify(db))}catch(e){}}}
-function login(){var n=nick.value.trim(),pw=pass.value.trim();if(!n||!pw){err.innerText='Введите ник и пароль!';return}var db=getDB();if(db[n]){if(db[n].p!==pw){err.innerText='Неверный пароль!';return}}else{db[n]={p:pw,c:0,e:0,o1:0,o2:0,o3:0};try{localStorage.setItem('sh_accs',JSON.stringify(db))}catch(e){}}curUser=n;var u=db[n];coins=u.c||0;eq=u.e||0;o1=u.o1||0;o2=u.o2||0;o3=u.o3||0;un.innerText=curUser;err.innerText='';auth.className='scr hide';menu.className='scr';up()}
-function logout(){saveProg();curUser='';nick.value=pass.value='';menu.className='scr hide';auth.className='scr'}
-function sl(i){loc=i;l0.className=i==0?'act':'';l1.className=i==1?'act':'';l2.className=i==2?'act':''}
-function up(){mc.innerText=gc.innerText=coins;w0.className=eq==0?'eq':'';w1.className=eq==1?'eq':'';w2.className=eq==2?'eq':'';w3.className=eq==3?'eq':'';w0.innerText=eq==0?'Пистолет (Выбр)':'Пистолет';w1.innerText=eq==1?'Автомат (Выбр)':(o1?'Автомат':'Автомат 40🪙');w2.innerText=eq==2?'Дробовик (Выбр)':(o2?'Дробовик':'Дробовик 100🪙');w3.innerText=eq==3?'Лазер (Выбр)':(o3?'Лазер':'Лазер 200🪙')}
-function bw(i){if(i==0)eq=0;if(i==1){if(o1)eq=1;else if(coins>=40){coins-=40;o1=1;eq=1}}if(i==2){if(o2)eq=2;else if(coins>=100){coins-=100;o2=1;eq=2}}if(i==3){if(o3)eq=3;else if(coins>=200){coins-=200;o3=1;eq=3}}saveProg();up()}
-function bn(id,k){var e=document.getElementById(id);e.ontouchstart=function(v){v.preventDefault();inp[k]=1};e.ontouchend=function(v){v.preventDefault();inp[k]=0};e.onmousedown=function(){inp[k]=1};e.onmouseup=function(){inp[k]=0}}
-bn('bl','l');bn('br','r');bn('bj','j');bn('bf','f');
-function go(){rz();menu.className='scr hide';over.className='scr hide';hud.className=ctrl.className='';p={x:W/2,y:gy-48,w:24,h:48,vy:0,d:1,hp:100,g:0,wk:0};bul=[];ens=[];drp=[];tk=0;hp.innerText=100;run=1;lp()}
-function tm(){run=0;saveProg();hud.className=ctrl.className='hide';over.className='scr hide';menu.className='scr';up()}
-function man(px,py,d,wk,en,bg){var s=bg?1.3:1,st=Math.sin(wk)*5;x.strokeStyle=en?'#1e8449':'#34495e';x.lineWidth=4*s;x.beginPath();x.moveTo(px+8*s,py+30*s);x.lineTo(px+8*s-st,py+46*s);x.moveTo(px+16*s,py+30*s);x.lineTo(px+16*s+st,py+46*s);x.stroke();x.fillStyle=en?(bg?'#8e44ad':'#27ae60'):'#2980b9';x.fillRect(px+4*s,py+14*s,16*s,18*s);x.fillStyle=en?'#58d68d':'#f5cba7';x.beginPath();x.arc(px+12*s,py+7*s,7*s,0,7);x.fill();x.fillStyle=en?'#f00':'#0df';x.fillRect(d==1?px+13*s:px+5*s,py+5*s,5*s,3*s);if(!en){x.fillStyle=eq==1?'#0df':(eq==2?'#f94':(eq==3?'#f45':'#fc0'));x.fillRect(d==1?px+12:px-10,py+19,22,5)}}
-function lp(){if(!run)return;if(inp.l){p.x-=5;p.d=-1;p.wk+=.3}else if(inp.r){p.x+=5;p.d=1;p.wk+=.3}else p.wk=0;if(inp.j&&p.g){p.vy=-12;p.g=0}p.vy+=.6;p.y+=p.vy;if(p.x<0)p.x=0;if(p.x+p.w>W)p.x=W-p.w;if(p.y+p.h>=gy){p.y=gy-p.h;p.vy=0;p.g=1}
-var rt=eq==1?120:(eq==2?600:(eq==3?220:350));if(inp.f&&Date.now()-lf>rt){lf=Date.now();var cn=eq==2?5:1;for(var i=0;i<cn;i++){var a=eq==2?(Math.random()-.5)*.35:0;bul.push({x:p.d==1?p.x+28:p.x-8,y:p.y+21,vx:Math.cos(a)*14*p.d,vy:Math.sin(a)*14,dm:eq==1?18:(eq==2?20:(eq==3?70:25)),pr:eq==3})}}
-for(var i=bul.length-1;i>=0;i--){bul[i].x+=bul[i].vx;bul[i].y+=bul[i].vy;if(bul[i].x<-20||bul[i].x>W+20)bul.splice(i,1)}
-if(++tk==20||tk%80==0){var bg=Math.random()<.25;ens.push({x:Math.random()<.5?-30:W+30,y:gy-(bg?60:46),w:bg?32:24,h:bg?60:46,sp:bg?1.5:2.5,hp:bg?100:40,bg:bg,wk:0,v:bg?25:10})}
-for(var i=ens.length-1;i>=0;i--){var e=ens[i];e.x+=(e.x<p.x?1:-1)*e.sp;e.wk+=.25;if(p.x<e.x+e.w&&p.x+p.w>e.x&&p.y<e.y+e.h&&p.y+p.h>e.y){p.hp-=20;hp.innerText=Math.max(0,p.hp);ens.splice(i,1);if(p.hp<=0){run=0;saveProg();hud.className=ctrl.className='hide';over.className='scr';return}continue}for(var j=bul.length-1;j>=0;j--){var b=bul[j];if(b.x>e.x&&b.x<e.x+e.w&&b.y>e.y&&b.y<e.y+e.h){e.hp-=b.dm;if(!b.pr)bul.splice(j,1);if(e.hp<=0){drp.push({x:e.x+10,y:gy-10,v:e.v});ens.splice(i,1);break}}}}
-for(var i=drp.length-1;i>=0;i--)if(Math.abs(p.x+12-drp[i].x)<35&&Math.abs(p.y+24-drp[i].y)<40){coins+=drp[i].v;gc.innerText=coins;saveProg();drp.splice(i,1)}
-x.fillStyle=loc==0?'#0f172a':(loc==1?'#f97316':'#450a0a');x.fillRect(0,0,W,gy);
-if(loc==0){x.fillStyle='#fef08a';x.beginPath();x.arc(W-70,50,20,0,7);x.fill();for(var bx=20;bx<W;bx+=90){x.fillStyle='#1e293b';x.fillRect(bx,gy-100,60,100);x.fillStyle='#facc15';x.fillRect(bx+12,gy-80,8,10)}}
-if(loc==1){x.fillStyle='#fde047';x.beginPath();x.arc(80,60,28,0,7);x.fill();x.fillStyle='#d97706';x.beginPath();x.moveTo(140,gy);x.lineTo(230,gy-100);x.lineTo(320,gy);x.fill()}
-if(loc==2){x.fillStyle='#1c1917';x.beginPath();x.moveTo(120,gy);x.lineTo(230,gy-120);x.lineTo(270,gy-120);x.lineTo(380,gy);x.fill();x.fillStyle='#ef4444';x.fillRect(232,gy-120,36,8)}
-x.fillStyle=loc==0?'#334155':(loc==1?'#eab308':'#1c1917');x.fillRect(0,gy,W,H-gy);
-for(var i=0;i<drp.length;i++){x.beginPath();x.arc(drp[i].x,drp[i].y,8,0,7);x.fillStyle='#f1c40f';x.fill()}
-man(p.x,p.y,p.d,p.wk,0,0);for(var i=0;i<ens.length;i++)man(ens[i].x,ens[i].y,ens[i].x<p.x?1:-1,ens[i].wk,1,ens[i].bg);
-x.fillStyle='#fff';for(var i=0;i<bul.length;i++)x.fillRect(bul[i].x-5,bul[i].y-2,10,4);
-requestAnimationFrame(lp)}
+document.getElementById('st').innerText = 'JS 1 OK';
+
+var db = {};
+var u = '';
+var cn = 0;
+var eq = 0;
+var lc = 0;
+var sn = 1;
+var ac = null;
+var o0 = 1;
+var o1 = 0;
+var o2 = 0;
+var o3 = 0;
+var o4 = 0;
+var o5 = 0;
+
+function getPrice(i) {
+  if (i === 1) return 40;
+  if (i === 2) return 100;
+  if (i === 3) return 200;
+  if (i === 4) return 350;
+  if (i === 5) return 500;
+  return 0;
+}
+
+function getWpnCol(i) {
+  if (i === 1) return '#ff9800';
+  if (i === 2) return '#ffffff';
+  if (i === 3) return '#00e5ff';
+  if (i === 4) return '#ff5252';
+  if (i === 5) return '#e040fb';
+  return '#ffeb3b';
+}
+
+function bp(f1, f2, d, t) {
+  if (!sn) return;
+  try {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!ac) ac = new AC();
+    if (ac.state === 'suspended') ac.resume();
+    var o = ac.createOscillator();
+    var g = ac.createGain();
+    o.type = t || 'square';
+    o.frequency.setValueAtTime(f1, ac.currentTime);
+    o.frequency.exponentialRampToValueAtTime(f2, ac.currentTime + d);
+    g.gain.setValueAtTime(0.08, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + d);
+    o.connect(g);
+    g.connect(ac.destination);
+    o.start();
+    o.stop(ac.currentTime + d);
+  } catch (e) {}
+}
+
+function getAcc(name) {
+  var d = db[name] || null;
+  try {
+    if (window.localStorage) {
+      var s = window.localStorage.getItem('apr2_' + name);
+      if (s) d = JSON.parse(s);
+    }
+  } catch (e) {}
+  return d;
+}
+
+function sv() {
+  if (!u) return;
+  var d = { p: document.getElementById('pw').value, c: cn, e: eq, o1: o1, o2: o2, o3: o3, o4: o4, o5: o5 };
+  db[u] = d;
+  try {
+    if (window.localStorage) {
+      window.localStorage.setItem('apr2_' + u, JSON.stringify(d));
+    }
+  } catch (e) {}
+}
+
+function hasW(i) {
+  if (i === 0) return o0;
+  if (i === 1) return o1;
+  if (i === 2) return o2;
+  if (i === 3) return o3;
+  if (i === 4) return o4;
+  if (i === 5) return o5;
+  return 0;
+}
+
+function setW(i) {
+  if (i === 1) o1 = 1;
+  if (i === 2) o2 = 1;
+  if (i === 3) o3 = 1;
+  if (i === 4) o4 = 1;
+  if (i === 5) o5 = 1;
+}
+
+function upMenu() {
+  document.getElementById('mc').innerText = cn;
+  document.getElementById('sc').innerText = cn;
+  for (var i = 0; i < 6; i++) {
+    var b = document.getElementById('w' + i);
+    var nm = b.getAttribute('data-n');
+    b.className = (eq === i) ? 'aw' : '';
+    if (eq === i) {
+      b.innerText = nm + ' [Выбр]';
+    } else if (hasW(i)) {
+      b.innerText = nm;
+    } else {
+      b.innerText = nm + ' (' + getPrice(i) + ')';
+    }
+  }
+  for (var j = 0; j < 3; j++) {
+    document.getElementById('l' + j).className = (lc === j) ? 'al' : '';
+  }
+}
+
+document.getElementById('bLgn').onclick = function() {
+  var n = document.getElementById('nk').value.trim();
+  var w = document.getElementById('pw').value.trim();
+  var er = document.getElementById('er');
+  if (!n || !w) {
+    er.innerText = 'Введите ник и пароль!';
+    return;
+  }
+  var d = getAcc(n);
+  if (d) {
+    if (d.p !== w) {
+      er.innerText = 'Неверный пароль!';
+      return;
+    }
+    cn = d.c || 0;
+    eq = d.e || 0;
+    o1 = d.o1 || 0;
+    o2 = d.o2 || 0;
+    o3 = d.o3 || 0;
+    o4 = d.o4 || 0;
+    o5 = d.o5 || 0;
+  } else {
+    cn = 0;
+    eq = 0;
+    o1 = 0;
+    o2 = 0;
+    o3 = 0;
+    o4 = 0;
+    o5 = 0;
+  }
+  u = n;
+  sv();
+  document.getElementById('un').innerText = u;
+  er.innerText = '';
+  document.getElementById('auth').className = 's h';
+  document.getElementById('menu').className = 's';
+  bp(400, 750, 0.15, 'sine');
+  upMenu();
+};
+
+document.getElementById('bOut').onclick = function() {
+  sv();
+  u = '';
+  document.getElementById('nk').value = '';
+  document.getElementById('pw').value = '';
+  document.getElementById('menu').className = 's h';
+  document.getElementById('auth').className = 's';
+};
+
+document.getElementById('bShopOpen').onclick = function() {
+  upMenu();
+  document.getElementById('shopM').className = 's';
+  bp(450, 650, 0.08, 'sine');
+};
+
+document.getElementById('bShopClose').onclick = function() {
+  document.getElementById('shopM').className = 's h';
+  bp(350, 250, 0.08, 'sine');
+};
+
+function togSnd() {
+  sn = sn ? 0 : 1;
+  var t = sn ? 'Звук: ВКЛ' : 'Звук: ВЫКЛ';
+  document.getElementById('bSnd').innerText = t;
+  document.getElementById('bSnd2').innerText = t;
+}
+document.getElementById('bSnd').onclick = togSnd;
+document.getElementById('bSnd2').onclick = togSnd;
+
+function selLoc(i) {
+  lc = i;
+  bp(320, 480, 0.08, 'sine');
+  upMenu();
+}
+document.getElementById('l0').onclick = function() { selLoc(0); };
+document.getElementById('l1').onclick = function() { selLoc(1); };
+document.getElementById('l2').onclick = function() { selLoc(2); };
+
+function buyW(i) {
+  if (hasW(i)) {
+    eq = i;
+  } else if (cn >= getPrice(i)) {
+    cn -= getPrice(i);
+    setW(i);
+    eq = i;
+  }
+  bp(520, 820, 0.1, 'sine');
+  sv();
+  upMenu();
+}
+document.getElementById('w0').onclick = function() { buyW(0); };
+document.getElementById('w1').onclick = function() { buyW(1); };
+document.getElementById('w2').onclick = function() { buyW(2); };
+document.getElementById('w3').onclick = function() { buyW(3); };
+document.getElementById('w4').onclick = function() { buyW(4); };
+document.getElementById('w5').onclick = function() { buyW(5); };
+</script>
+<script>
+document.getElementById('st').innerText = 'JS 2 OK';
+
+var cvs = document.getElementById('c');
+var x = cvs.getContext('2d');
+var W = 640;
+var H = 360;
+var gy = 280;
+var rn = 0;
+var md = 'solo';
+var tk = 0;
+var wv = 1;
+var kl = 0;
+var p1 = null;
+var p2 = null;
+var u2 = '';
+var eq2 = 0;
+var bl = new Array();
+var en = new Array();
+var dr = new Array();
+var bm = new Array();
+var kL = 0;
+var kR = 0;
+var kJ = 0;
+var kF = 0;
+var qL = 0;
+var qR = 0;
+var qJ = 0;
+var qF = 0;
+
+function rz() {
+  W = cvs.width = window.innerWidth;
+  H = cvs.height = window.innerHeight;
+  gy = Math.floor((H - 85) / 4) * 4;
+  x.imageSmoothingEnabled = false;
+}
+window.onresize = rz;
+rz();
+
+function px(col, X, Y, w, h) {
+  x.fillStyle = col;
+  x.fillRect(Math.floor(X), Math.floor(Y), Math.floor(w), Math.floor(h));
+}
+
+function upHud() {
+  if (md === 'solo') {
+    document.getElementById('hL').innerHTML = 'HP: <b>' + Math.max(0, p1.hp) + '</b> | Монеты: <b>' + cn + '</b>';
+    document.getElementById('hM').innerHTML = 'Волна: <b>' + wv + '</b> | Убито: <b>' + kl + '</b>';
+  } else {
+    document.getElementById('hL').innerHTML = u + ': <b>' + Math.max(0, p1.hp) + '</b> | ' + u2 + ': <b>' + Math.max(0, p2.hp) + '</b>';
+    document.getElementById('hM').innerHTML = '<b>' + u + '</b> vs <b>' + u2 + '</b>';
+  }
+}
+
+function goGame(m) {
+  md = m;
+  rn = 1;
+  tk = 0;
+  wv = 1;
+  kl = 0;
+  bl = new Array();
+  en = new Array();
+  dr = new Array();
+  bm = new Array();
+  p1 = { x: 80, y: gy - 52, vx: 0, vy: 0, hp: 100, mhp: 100, dir: 1, cd: 0, w: eq, nm: u, col: '#00d2ff', st: 0 };
+  if (m === 'pvp') {
+    p1.hp = 150;
+    p1.mhp = 150;
+    p2 = { x: W - 116, y: gy - 52, vx: 0, vy: 0, hp: 150, mhp: 150, dir: -1, cd: 0, w: eq2, nm: u2, col: '#ff9800', st: 0 };
+    document.getElementById('ctrl').className = 'h';
+  } else {
+    p2 = null;
+    document.getElementById('ctrl').className = '';
+  }
+  document.getElementById('menu').className = 's h';
+  document.getElementById('over').className = 's h';
+  document.getElementById('hud').className = '';
+  upHud();
+  bp(300, 620, 0.2, 'sine');
+}
+
+document.getElementById('bSolo').onclick = function() {
+  goGame('solo');
+};
+document.getElementById('bPvpOpen').onclick = function() {
+  document.getElementById('pvpM').className = 's';
+};
+document.getElementById('bPvpNo').onclick = function() {
+  document.getElementById('pvpM').className = 's h';
+};
+
+document.getElementById('bPvpGo').onclick = function() {
+  var n2 = document.getElementById('nk2').value.trim();
+  var w2 = document.getElementById('pw2').value.trim();
+  var er2 = document.getElementById('er2');
+  if (!n2 || !w2) {
+    er2.innerText = 'Введите ник и пароль 2-го игрока!';
+    return;
+  }
+  if (n2 === u) {
+    er2.innerText = 'Нельзя играть против себя!';
+    return;
+  }
+  var d2 = getAcc(n2);
+  if (!d2) {
+    er2.innerText = 'Аккаунт не найден!';
+    return;
+  }
+  if (d2.p !== w2) {
+    er2.innerText = 'Неверный пароль!';
+    return;
+  }
+  u2 = n2;
+  eq2 = d2.e || 0;
+  er2.innerText = '';
+  document.getElementById('pvpM').className = 's h';
+  goGame('pvp');
+};
+
+function toMenu() {
+  rn = 0;
+  sv();
+  upMenu();
+  document.getElementById('over').className = 's h';
+  document.getElementById('hud').className = 's h';
+  document.getElementById('ctrl').className = 's h';
+  document.getElementById('menu').className = 's';
+}
+document.getElementById('bTm1').onclick = toMenu;
+document.getElementById('bTm2').onclick = toMenu;
+
+function endM(t, s) {
+  rn = 0;
+  sv();
+  document.getElementById('oTit').innerText = t;
+  document.getElementById('oSub').innerText = s;
+  document.getElementById('hud').className = 's h';
+  document.getElementById('ctrl').className = 's h';
+  document.getElementById('over').className = 's';
+}
+
+function drawBg() {
+  if (lc === 0) {
+    px('#090d1a', 0, 0, W, gy * 0.45);
+    px('#111a33', 0, gy * 0.45, W, gy * 0.35);
+    px('#1a284d', 0, gy * 0.8, W, gy * 0.2);
+    px('#fff9c4', W - 110, 36, 24, 24);
+    px('#090d1a', W - 102, 36, 16, 16);
+    for (var s = 0; s < 32; s++) {
+      var sx = (s * 89) % W;
+      var sy = (s * 47) % (gy - 90);
+      px((s + Math.floor(tk / 20)) % 3 === 0 ? '#ffffff' : '#64b5f6', sx, sy, 4, 4);
+    }
+    for (var b = 0; b < W + 80; b += 80) {
+      var bh = 84 + ((b * 19) % 88);
+      px('#0f1629', b, gy - bh, 68, bh);
+      px('#1b2642', b + 4, gy - bh + 4, 60, bh - 4);
+      px('#e74c3c', b + 32, gy - bh - 12, 4, 12);
+      if (Math.floor(tk / 25) % 2 === 0) px('#ff8a80', b + 30, gy - bh - 16, 8, 8);
+      for (var wy = gy - bh + 16; wy < gy - 16; wy += 20) {
+        if ((b + wy) % 3 !== 0) px('#ffd54f', b + 12, wy, 12, 12);
+        else px('#263238', b + 12, wy, 12, 12);
+        if ((b + wy) % 2 === 0) px('#4fc3f7', b + 40, wy, 12, 12);
+        else px('#263238', b + 40, wy, 12, 12);
+      }
+    }
+    px('#455a64', 0, gy, W, 8);
+    px('#263238', 0, gy + 8, W, H - gy - 8);
+    for (var gx = 0; gx < W; gx += 32) {
+      px('#37474f', gx, gy + 4, 16, 4);
+      px('#ffd54f', gx + 4, gy + 24, 16, 4);
+    }
+  } else if (lc === 1) {
+    px('#d35400', 0, 0, W, gy * 0.4);
+    px('#e67e22', 0, gy * 0.4, W, gy * 0.35);
+    px('#f39c12', 0, gy * 0.75, W, gy * 0.25);
+    px('#fff59d', W - 120, 40, 36, 36);
+    px('#ffffff', W - 112, 48, 20, 20);
+    for (var p = 40; p < W; p += 260) {
+      for (var step = 0; step < 8; step++) {
+        var pw = 128 - step * 16;
+        px(step % 2 === 0 ? '#c0392b' : '#d35400', p + step * 8, gy - (step + 1) * 10, pw, 10);
+      }
+    }
+    for (var cx = 50; cx < W; cx += 170) {
+      px('#1b5e20', cx, gy - 40, 12, 40);
+      px('#2e7d32', cx + 4, gy - 40, 4, 40);
+      px('#1b5e20', cx - 8, gy - 28, 8, 8);
+      px('#1b5e20', cx - 8, gy - 36, 4, 8);
+      px('#1b5e20', cx + 12, gy - 24, 8, 8);
+      px('#1b5e20', cx + 16, gy - 32, 4, 8);
+    }
+    px('#f1c40f', 0, gy, W, 8);
+    px('#e67e22', 0, gy + 8, W, H - gy - 8);
+    for (var sx2 = 0; sx2 < W; sx2 += 24) {
+      px('#d35400', sx2, gy + 12, 8, 4);
+      px('#f39c12', sx2 + 12, gy + 24, 8, 4);
+    }
+  } else {
+    px('#1a0303', 0, 0, W, gy * 0.5);
+    px('#3b0909', 0, gy * 0.5, W, gy * 0.3);
+    px('#611212', 0, gy * 0.8, W, gy * 0.2);
+    for (var v = 0; v < 14; v++) {
+      var vx = Math.floor(W * 0.5) + ((v * 29) % 80) - 40;
+      var vy = gy - 130 - ((tk * 2 + v * 19) % 110);
+      px(v % 2 === 0 ? '#ff5722' : '#ffd54f', vx, vy, 4, 4);
+    }
+    for (var stp = 0; stp < 14; stp++) {
+      var vw = 240 - stp * 14;
+      px(stp % 2 === 0 ? '#210709' : '#2e0b0e', Math.floor(W * 0.5) - vw / 2, gy - (stp + 1) * 10, vw, 10);
+    }
+    px('#ff3d00', Math.floor(W * 0.5) - 24, gy - 144, 48, 8);
+    px('#ffd54f', Math.floor(W * 0.5) - 16, gy - 144, 32, 4);
+    px('#ff3d00', 0, gy, W, 8);
+    px('#ffd54f', (tk * 2) % 32, gy + 2, 16, 4);
+    px('#1c0808', 0, gy + 8, W, H - gy - 8);
+    for (var rx2 = 0; rx2 < W; rx2 += 32) {
+      px('#3e1414', rx2, gy + 14, 16, 8);
+      px('#ff5722', rx2 + 16, gy + 26, 8, 4);
+    }
+  }
+}
+</script>
+<script>
+function shoot(pl, oid) {
+  if (pl.cd > 0) return;
+  var wi = pl.w;
+  var cd = 20;
+  var spd = 11;
+  var dmg = 22;
+  var sz = 6;
+  var f1 = 520;
+  var f2 = 200;
+  var tp = 'n';
+  if (wi === 1) { cd = 8; spd = 14; dmg = 15; sz = 4; f1 = 620; f2 = 260; }
+  if (wi === 2) { cd = 36; spd = 10; dmg = 17; sz = 4; f1 = 300; f2 = 110; tp = 'sg'; }
+  if (wi === 3) { cd = 15; spd = 24; dmg = 38; sz = 6; f1 = 920; f2 = 420; tp = 'pr'; }
+  if (wi === 4) { cd = 44; spd = 9; dmg = 85; sz = 8; f1 = 240; f2 = 60; tp = 'bm'; }
+  if (wi === 5) { cd = 26; spd = 15; dmg = 120; sz = 10; f1 = 720; f2 = 150; tp = 'bm'; }
+  var col = getWpnCol(wi);
+  pl.cd = cd;
+  bp(f1, f2, 0.08, 'square');
+  var bx = pl.dir > 0 ? pl.x + 36 : pl.x - 12;
+  var by = pl.y + 22;
+  if (tp === 'sg') {
+    for (var s = -1; s <= 1; s++) {
+      bl.push({ x: bx, y: by, vx: pl.dir * spd, vy: s * 1.8, dmg: dmg, col: col, sz: sz, own: oid, tp: 'n', lf: 35 });
+    }
+  } else {
+    bl.push({ x: bx, y: by, vx: pl.dir * spd, vy: 0, dmg: dmg, col: col, sz: sz, own: oid, tp: tp, lf: 95 });
+  }
+}
+
+function boom(bx, by, r, col) {
+  bm.push({ x: bx, y: by, r: r, col: col, t: 14 });
+  bp(140, 40, 0.25, 'sawtooth');
+}
+
+function spEn() {
+  var sx = Math.random() < 0.5 ? -44 : W + 16;
+  var bs = (wv % 3 === 0 && kl > 0 && kl % 6 === 0);
+  var hp = bs ? (150 + wv * 35) : (30 + wv * 12);
+  en.push({
+    x: sx,
+    y: gy - (bs ? 76 : 52),
+    w: bs ? 48 : 32,
+    h: bs ? 76 : 52,
+    hp: hp,
+    mhp: hp,
+    spd: (bs ? 1.1 : (1.5 + Math.random() * 1.2)) + wv * 0.1,
+    dmg: bs ? 25 : 10,
+    bs: bs,
+    st: Math.random() * 6
+  });
+}
+
+function updPl(pl, L, R, J, F, oid) {
+  if (L) {
+    pl.vx = -4.6;
+    pl.dir = -1;
+    pl.st += 0.35;
+  } else if (R) {
+    pl.vx = 4.6;
+    pl.dir = 1;
+    pl.st += 0.35;
+  } else {
+    pl.vx *= 0.75;
+    pl.st = 0;
+  }
+  if (J && pl.y >= gy - 52) {
+    pl.vy = -12.8;
+    bp(250, 520, 0.1, 'sine');
+  }
+  pl.vy += 0.6;
+  pl.x += pl.vx;
+  pl.y += pl.vy;
+  if (pl.y > gy - 52) {
+    pl.y = gy - 52;
+    pl.vy = 0;
+  }
+  if (pl.x < 6) pl.x = 6;
+  if (pl.x > W - 38) pl.x = W - 38;
+  if (pl.cd > 0) pl.cd--;
+  if (F) shoot(pl, oid);
+}
+
+function drwPl(pl) {
+  var X = Math.floor(pl.x / 2) * 2;
+  var Y = Math.floor(pl.y / 2) * 2;
+  var lg = Math.floor(Math.sin(pl.st) * 4);
+  px('#111827', X + 4, Y - 2, 24, 54);
+  px('#1f2937', X + 6, Y + 38, 8, 12 + lg);
+  px('#1f2937', X + 18, Y + 38, 8, 12 - lg);
+  px('#4b5563', X + 6, Y + 46 + lg, 8, 4);
+  px('#4b5563', X + 18, Y + 46 - lg, 8, 4);
+  px(pl.col, X + 4, Y + 16, 24, 22);
+  px('#ffffff', X + 8, Y + 20, 16, 8);
+  px('#374151', X + 4, Y + 34, 24, 4);
+  px('#e5e7eb', X + 6, Y, 20, 16);
+  px('#9ca3af', X + 6, Y, 20, 4);
+  px('#00e5ff', pl.dir > 0 ? X + 16 : X + 6, Y + 6, 10, 6);
+  px('#ffffff', pl.dir > 0 ? X + 20 : X + 8, Y + 6, 4, 2);
+  var wc = getWpnCol(pl.w);
+  var gx = pl.dir > 0 ? X + 18 : X - 14;
+  px('#111827', gx - 2, Y + 20, 32, 10);
+  px('#4b5563', gx, Y + 22, 28, 6);
+  px(wc, pl.dir > 0 ? gx + 14 : gx, Y + 22, 14, 4);
+  if (pl.cd > 14) {
+    px('#fff59d', pl.dir > 0 ? gx + 28 : gx - 8, Y + 20, 8, 8);
+  }
+  x.fillStyle = '#ffffff';
+  x.font = 'bold 11px monospace';
+  x.textAlign = 'center';
+  x.fillText(pl.nm, X + 16, Y - 14);
+  px('#111827', X - 2, Y - 10, 36, 6);
+  px('#2ecc71', X, Y - 8, 32 * Math.max(0, pl.hp / pl.mhp), 2);
+}
+
+function drwEn(e, dir) {
+  var X = Math.floor(e.x / 2) * 2;
+  var Y = Math.floor(e.y / 2) * 2;
+  var lg = Math.floor(Math.sin(e.st) * 4);
+  var armY = Math.floor(Math.cos(e.st * 1.5) * 2);
+  if (e.bs) {
+    px('#111827', X + 6, Y + 52, 12, 24 + lg);
+    px('#111827', X + 30, Y + 52, 12, 24 - lg);
+    px('#2c3e50', X + 8, Y + 52, 8, 22 + lg);
+    px('#2c3e50', X + 32, Y + 52, 8, 22 - lg);
+    px('#4a148c', X + 2, Y + 20, 44, 34);
+    px('#6a1b9a', X + 6, Y + 22, 36, 28);
+    px('#37474f', X - 2, Y + 18, 12, 12);
+    px('#37474f', X + 38, Y + 18, 12, 12);
+    px('#ffd54f', X + 2, Y + 12, 4, 6);
+    px('#ffd54f', X + 42, Y + 12, 4, 6);
+    px('#ff1744', X + 18, Y + 28, 12, 12);
+    px('#ff8a80', X + 20, Y + 30, 8, 8);
+    var bx = dir > 0 ? X + 36 : X - 12;
+    px('#4a148c', bx, Y + 26 + armY, 24, 12);
+    px('#8e24aa', bx + 2, Y + 28 + armY, 20, 8);
+    px('#7b1fa2', X + 10, Y, 28, 20);
+    px('#eceff1', X + 6, Y - 6, 4, 8);
+    px('#eceff1', X + 38, Y - 6, 4, 8);
+    px('#f1c40f', X + 12, Y - 8, 24, 6);
+    px('#ff1744', X + 16, Y - 6, 4, 4);
+    px('#ff1744', X + 28, Y - 6, 4, 4);
+    px('#111827', dir > 0 ? X + 20 : X + 12, Y + 6, 16, 6);
+    px('#ffeb3b', dir > 0 ? X + 28 : X + 14, Y + 8, 6, 4);
+    px('#111827', dir > 0 ? X + 22 : X + 14, Y + 14, 12, 4);
+    px('#ffffff', dir > 0 ? X + 24 : X + 16, Y + 14, 2, 2);
+    px('#ffffff', dir > 0 ? X + 30 : X + 22, Y + 14, 2, 2);
+  } else {
+    var sk = lc === 2 ? '#e57373' : '#66bb6a';
+    var skD = lc === 2 ? '#b71c1c' : '#2e7d32';
+    var cl = lc === 2 ? '#3e2723' : '#37474f';
+    px('#111827', X + 6, Y + 36, 8, 16 + lg);
+    px('#111827', X + 18, Y + 36, 8, 16 - lg);
+    px('#263238', X + 8, Y + 36, 4, 14 + lg);
+    px('#263238', X + 20, Y + 36, 4, 14 - lg);
+    px(cl, X + 6, Y + 18, 20, 20);
+    px(skD, X + 10, Y + 22, 6, 6);
+    px(sk, X + 18, Y + 28, 6, 4);
+    var ax = dir > 0 ? X + 18 : X - 8;
+    px(skD, ax, Y + 20 + armY, 22, 8);
+    px(sk, ax + (dir > 0 ? 14 : 0), Y + 20 + armY, 8, 8);
+    px('#111827', X + 4, Y, 24, 18);
+    px(sk, X + 6, Y + 2, 20, 14);
+    px(skD, X + 6, Y + 2, 20, 4);
+    px('#111827', dir > 0 ? X + 14 : X + 6, Y + 6, 12, 6);
+    px('#ff1744', dir > 0 ? X + 20 : X + 8, Y + 8, 4, 4);
+    px('#111827', dir > 0 ? X + 16 : X + 8, Y + 13, 8, 3);
+    px('#fff9c4', dir > 0 ? X + 18 : X + 10, Y + 13, 2, 2);
+  }
+  px('#111827', X - 2, Y - 16, e.w + 4, 6);
+  px('#e74c3c', X, Y - 14, e.w * Math.max(0, e.hp / e.mhp), 2);
+}
+
+function loop() {
+  requestAnimationFrame(loop);
+  drawBg();
+  if (!rn) return;
+  tk++;
+
+  updPl(p1, kL, kR, kJ, kF, 1);
+  if (md === 'pvp' && p2) updPl(p2, qL, qR, qJ, qF, 2);
+  if (md === 'solo' && tk % Math.max(35, 110 - wv * 8) === 0 && en.length < 4 + wv) spEn();
+
+  for (var i = bl.length - 1; i >= 0; i--) {
+    var b = bl[i];
+    b.x += b.vx;
+    b.y += b.vy;
+    b.lf--;
+    px(b.col, b.x - b.vx * 0.8, b.y, b.sz * 2.4, b.sz);
+    px('#ffffff', b.x, b.y + 1, b.sz * 1.2, b.sz - 2);
+    var rm = false;
+    if (md === 'solo' && b.own === 1) {
+      for (var j = en.length - 1; j >= 0; j--) {
+        var e = en[j];
+        if (b.x > e.x && b.x < e.x + e.w && b.y > e.y && b.y < e.y + e.h) {
+          e.hp -= b.dmg;
+          if (b.tp === 'bm') {
+            boom(b.x, b.y, 64, b.col);
+            for (var q = 0; q < en.length; q++) {
+              if (Math.abs(en[q].x - b.x) < 70) en[q].hp -= b.dmg * 0.7;
+            }
+          }
+          if (b.tp !== 'pr') rm = true;
+          break;
+        }
+      }
+    } else if (md === 'pvp') {
+      var tg = (b.own === 1) ? p2 : p1;
+      if (tg && b.x > tg.x && b.x < tg.x + 32 && b.y > tg.y && b.y < tg.y + 52) {
+        tg.hp -= b.dmg;
+        if (b.tp === 'bm') boom(b.x, b.y, 56, b.col);
+        if (b.tp !== 'pr') rm = true;
+        upHud();
+        if (tg.hp <= 0) {
+          var wn = (b.own === 1) ? u : u2;
+          if (b.own === 1) cn += 25;
+          endM('ПОБЕДИЛ ' + wn.toUpperCase() + '!', 'Награда: +25 монет');
+          return;
+        }
+      }
+    }
+    if (rm || b.lf <= 0 || b.x < -30 || b.x > W + 30) bl.splice(i, 1);
+  }
+
+  for (var k = en.length - 1; k >= 0; k--) {
+    var e = en[k];
+    if (e.hp <= 0) {
+      bp(600, 900, 0.1, 'sine');
+      dr.push({ x: e.x + 12, y: gy - 18, v: e.bs ? 20 : 4 });
+      kl++;
+      if (kl % 5 === 0) wv++;
+      upHud();
+      en.splice(k, 1);
+      continue;
+    }
+    var dirE = p1.x > e.x ? 1 : -1;
+    e.x += dirE * e.spd;
+    e.st += e.bs ? 0.16 : 0.28;
+    drwEn(e, dirE);
+    if (Math.abs(e.x - p1.x) < 26 && Math.abs(e.y - p1.y) < 38 && tk % 30 === 0) {
+      p1.hp -= e.dmg;
+      bp(150, 80, 0.12, 'square');
+      upHud();
+      if (p1.hp <= 0) {
+        endM('ВЫ ПОГИБЛИ', 'Волна: ' + wv + ' | Убито: ' + kl);
+        return;
+      }
+    }
+  }
+
+  for (var m = dr.length - 1; m >= 0; m--) {
+    var d = dr[m];
+    var dy = d.y + Math.floor(Math.sin(tk * 0.15) * 3);
+    px('#111827', d.x - 2, dy - 2, 16, 16);
+    px('#f39c12', d.x, dy, 12, 12);
+    px('#ffeb3b', d.x + 2, dy + 2, 8, 8);
+    px('#ffffff', d.x + 4, dy + 2, 2, 4);
+    if (Math.abs(d.x - (p1.x + 16)) < 28 && Math.abs(d.y - (p1.y + 26)) < 32) {
+      cn += d.v;
+      bp(820, 1220, 0.08, 'sine');
+      upHud();
+      dr.splice(m, 1);
+    }
+  }
+
+  for (var n = bm.length - 1; n >= 0; n--) {
+    var z = bm[n];
+    var szB = Math.floor((1 - z.t / 14) * z.r);
+    px(z.col, z.x - szB, z.y - szB, szB * 2, szB * 2);
+    px('#ffeb3b', z.x - szB * 0.6, z.y - szB * 0.6, szB * 1.2, szB * 1.2);
+    px('#ffffff', z.x - szB * 0.3, z.y - szB * 0.3, szB * 0.6, szB * 0.6);
+    z.t--;
+    if (z.t <= 0) bm.splice(n, 1);
+  }
+
+  drwPl(p1);
+  if (md === 'pvp' && p2) drwPl(p2);
+}
+
+function pad(id, fn) {
+  var el = document.getElementById(id);
+  el.onmousedown = el.ontouchstart = function(e) {
+    e.preventDefault();
+    fn(1);
+  };
+  el.onmouseup = el.ontouchend = el.onmouseleave = function(e) {
+    e.preventDefault();
+    fn(0);
+  };
+}
+pad('pL', function(v) { kL = v; });
+pad('pR', function(v) { kR = v; });
+pad('pJ', function(v) { kJ = v; });
+pad('pF', function(v) { kF = v; });
+
+window.onkeydown = function(e) {
+  var c = e.keyCode;
+  if (c === 65) kL = 1;
+  if (c === 68) kR = 1;
+  if (c === 87) kJ = 1;
+  if (c === 32 || c === 70) kF = 1;
+  if (c === 37) qL = 1;
+  if (c === 39) qR = 1;
+  if (c === 38) qJ = 1;
+  if (c === 13 || c === 16) qF = 1;
+};
+window.onkeyup = function(e) {
+  var c = e.keyCode;
+  if (c === 65) kL = 0;
+  if (c === 68) kR = 0;
+  if (c === 87) kJ = 0;
+  if (c === 32 || c === 70) kF = 0;
+  if (c === 37) qL = 0;
+  if (c === 39) qR = 0;
+  if (c === 38) qJ = 0;
+  if (c === 13 || c === 16) qF = 0;
+};
+
+document.getElementById('st').innerText = 'ALL OK';
+loop();
 </script>
 </body>
-                                                                                                                                                                                                                         </html>
-                                                                                                                                                                                                                         
+</html>
